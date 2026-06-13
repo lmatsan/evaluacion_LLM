@@ -1,0 +1,8 @@
+google-generativeai==0.8.6
+pdfplumber==0.11.9
+langchain-text-splitters==1.1.2
+chromadb==1.5.9
+python-dotenv==1.2.2
+pandas==3.0.3
+streamlit==1.58.0
+plotly==6.8.0

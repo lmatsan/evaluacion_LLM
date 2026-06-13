@@ -1,0 +1,15 @@
+# Seguridad 
+.env
+
+# Python 
+__pycache__/
+*.pyc
+venv/
+
+# Artefacos
+logs/
+*.log
+
+# IDEs y sistema:
+.DS_Store
+.ipynb_checkpoints/
