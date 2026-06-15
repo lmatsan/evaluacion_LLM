@@ -9,6 +9,7 @@ venv/
 # Artefacos
 logs/
 *.log
+data/chromadb/
 
 # IDEs y sistema:
 .DS_Store
