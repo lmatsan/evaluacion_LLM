@@ -20,6 +20,7 @@ chat_with_tools()
 ```
 
 **Flujo de function calling (dos llamadas):**
+
 1. El LLM recibe la pregunta y decide si necesita datos meteorológicos
 2. Si llama a `get_weather`, Python ejecuta la función y devuelve el pronóstico
 3. El LLM recibe el resultado y redacta la respuesta final
@@ -66,7 +67,7 @@ venv\Scripts\activate
 source venv/bin/activate
 
 # 4. Instalar dependencias
-pip install -r requirements.txt
+pip install -r requirements-lock.txt
 ```
 
 ## Configuración
@@ -85,26 +86,39 @@ GOOGLE_API_KEY=tu_clave_aqui
 jupyter notebook notebooks/main.ipynb
 ```
 
+### Interfaz web (Streamlit)
+
+```bash
+streamlit run app.py
+```
+
+La app incluye:
+
+- **Streaming de respuestas**: el texto aparece token a token en lugar de esperar a que el LLM termine
+- **Botones de preguntas rápidas**: sugerencias clicables al iniciar la conversación para guiar al usuario
+- **Mapa interactivo**: sidebar con las dos zonas geográficas (Norte y Sur) sobre las que el asistente puede consultar el tiempo
+- **Botón de limpiar conversación**: reinicia el historial desde el sidebar
+
 Ejecuta las celdas en orden. El notebook está estructurado en 9 secciones:
 
-| Sección | Contenido |
-|---------|-----------|
-| 1 | Setup, carga de variables de entorno y verificación de conexión |
-| 2 | Lectura y extracción de texto del PDF |
-| 3 | Chunking con `RecursiveCharacterTextSplitter` y enriquecimiento de metadatos |
-| 4 | Generación de embeddings con Gemini y almacenamiento en ChromaDB |
-| 5 | Búsqueda semántica (RAG) e inyección de contexto en el prompt |
-| 6 | Diálogo multiturno con control de ventana de tokens |
-| 7 | Integración con Open-Meteo API (`get_weather`) |
-| 8 | Agente conversacional con function calling (LangChain + `@tool`) |
-| 9 | Evaluación automática: latencia, citación de fuentes y detección de tool calling |
+| Sección | Contenido                                                                        |
+| ------- | -------------------------------------------------------------------------------- |
+| 1       | Setup, carga de variables de entorno y verificación de conexión                  |
+| 2       | Lectura y extracción de texto del PDF                                            |
+| 3       | Chunking con `RecursiveCharacterTextSplitter` y enriquecimiento de metadatos     |
+| 4       | Generación de embeddings con Gemini y almacenamiento en ChromaDB                 |
+| 5       | Búsqueda semántica (RAG) e inyección de contexto en el prompt                    |
+| 6       | Diálogo multiturno con control de ventana de tokens                              |
+| 7       | Integración con Open-Meteo API (`get_weather`)                                   |
+| 8       | Agente conversacional con function calling (LangChain + `@tool`)                 |
+| 9       | Evaluación automática: latencia, citación de fuentes y detección de tool calling |
 
 ## Modelos utilizados
 
-| Uso | Modelo |
-|-----|--------|
-| Generación de respuestas | `gemini-2.5-flash` |
-| Embeddings | `models/gemini-embedding-001` |
+| Uso                      | Modelo                        |
+| ------------------------ | ----------------------------- |
+| Generación de respuestas | `gemini-2.5-flash`            |
+| Embeddings               | `models/gemini-embedding-001` |
 
 ## Características principales
 

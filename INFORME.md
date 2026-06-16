@@ -56,7 +56,7 @@ Esto significa que cada pregunta sobre el tiempo hace **dos llamadas a la API de
 
 ### 2.1 Chunking con metadatos enriquecidos
 
-El PDF se divide en fragmentos usando `RecursiveCharacterTextSplitter` con separadores adaptados al formato del documento (`\n\n`, `\n•`, `▪`, etc.). El tamaño elegido fue de **1000 caracteres con 200 de solapamiento**. Se probaron estos valores como punto de partida razonable: chunks demasiado pequeños pierden contexto dentro del fragmento, y chunks demasiado grandes reducen la precisión de la búsqueda semántica. El solapamiento evita que una idea que cae justo en el corte entre dos chunks quede partida y pierda significado.
+El PDF se divide en fragmentos usando `RecursiveCharacterTextSplitter` con separadores adaptados al formato del documento (`\n\n`, `\n•`, `▪`, etc.). El tamaño elegido fue de **1000 caracteres con 200 de solapamiento**. Se probaron estos valores como punto de partida razonable: chunks demasiado pequeños pierden contexto dentro del fragmento y chunks demasiado grandes reducen la precisión de la búsqueda semántica. El solapamiento evita que una idea que cae justo en el corte entre dos chunks quede partida y pierda significado.
 
 La decisión fue enriquecer cada chunk con metadatos de **zona** (`Norte`/`Sur`) y **tipo** (`Sitio de interés`/`Restaurante`), detectados mediante una máquina de estados que lee el texto secuencialmente. Esto permite que el LLM cite fuentes con información concreta (`[Sur - Sitio de interés]`) en lugar de solo decir "según el documento".
 
@@ -71,7 +71,7 @@ ChromaDB se persiste en disco (`data/chromadb/`), de modo que no hay que regener
 
 ### 2.3 Definición de la herramienta con `@tool`
 
-En vez de definir la función con JSON Schema puro, se usó el decorador `@tool` de LangChain. Esto tiene una ventaja práctica: la descripción de la función y sus argumentos se escriben directamente en el docstring de Python, y LangChain se encarga de convertirlos al formato que entiende Gemini. Además, el docstring incluye instrucciones explícitas para el LLM sobre cuándo debe usar la herramienta.
+En vez de definir la función con JSON Schema puro, se usó el decorador `@tool` de LangChain. Esto tiene una ventaja: la descripción de la función y sus argumentos se escriben directamente en el docstring de Python, y LangChain se encarga de convertirlos al formato que entiende Gemini. Además, el docstring incluye instrucciones explícitas para el LLM sobre cuándo debe usar la herramienta.
 
 ### 2.4 Garantía de citación de fuentes en tool calling
 
@@ -163,4 +163,3 @@ Guardar el historial de cada usuario en una base de datos (SQLite, Redis) indexa
 ### 5.3 Detección de zona más robusta
 
 Añadir un diccionario de municipios y puntos de interés mapeados a sus zonas para que `get_weather` no dependa de que el modelo infiera la zona correctamente.
-
