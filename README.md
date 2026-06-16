@@ -54,7 +54,7 @@ Evaluacion/
 
 ```bash
 # 1. Clonar el repositorio
-git clone <url-del-repositorio>
+git clone https://github.com/lmatsan/evaluacion_LLM.git
 cd Evaluacion
 
 # 2. Crear entorno virtual
