@@ -58,7 +58,7 @@ git clone https://github.com/lmatsan/evaluacion_LLM.git
 cd Evaluacion
 
 # 2. Crear entorno virtual
-python -m venv venv
+py -3.11 -m venv venv
 
 # 3. Activar el entorno virtual
 # Windows:
