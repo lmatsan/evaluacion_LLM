@@ -10,7 +10,9 @@ class GeminiEmbeddingFunction(Embeddings):
     """Adaptador entre la API de Gemini y ChromaDB — implementa la interfaz
     EmbeddingFunction para que ChromaDB pueda generar embeddings con Gemini 
     de forma transparente."""
-    def __init__(self, api_client: genai.Client, model_name: str = EMBEDDING_MODEL):
+    from google import genai
+    def __init__(self, api_client: genai.Client, model_name: str = "models/gemini-embedding-001"
+):
         """
         Inicializamos el cliente de Google GenAI.
         """
@@ -160,14 +162,10 @@ def extraer_texto_pdf(PDF_PATH: Path) -> str:
         # pdf.pages es una lista de páginas
         # cada página tiene un método .extract_text()
         content = []
-        for i, page in enumerate(pdf.pages):
+        for page in pdf.pages:
             text = page.extract_text()
             if text:
-                print(f"Texto de la página {i + 1}:\n{text[0:50]}\n")
                 content.append(text)
-            else:
-                print(f"No se pudo extraer texto de la página {i + 1}.")
-        print(f"Se extrajo texto de {len(pdf.pages)} páginas del PDF.")
 
     # Unir y devolver todo el contenido extraído en un solo string
     return "\n".join(content)
