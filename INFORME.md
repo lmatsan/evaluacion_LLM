@@ -42,7 +42,7 @@ Usuario (Streamlit)
 
 ### El flujo de dos llamadas al LLM
 
-Este es el punto más importante de entender. Cuando hay function calling, el LLM no puede responder directamente porque necesita datos externos. El flujo es:
+Este concepto se trabajó bastante en clase, así que quedó claro desde el principio. Cuando hay function calling, el LLM no puede responder directamente porque necesita datos externos. El flujo es:
 
 1. **Primera llamada:** el LLM recibe la pregunta y decide que necesita el tiempo. En vez de responder texto, devuelve una _petición de ejecución_ con la herramienta que quiere usar y los argumentos.
 2. **Python ejecuta `get_weather`** con esos argumentos y obtiene el pronóstico real de Open-Meteo.
@@ -75,20 +75,20 @@ En vez de definir la función con JSON Schema puro, se usó el decorador `@tool`
 
 ### 2.4 Garantía de citación de fuentes en tool calling
 
-Durante el desarrollo se detectó que el LLM no siempre incluía la cita `[get_weather]` en la respuesta. Para garantizar la consistencia (especialmente importante para la evaluación automática), se añadió una comprobación tras la segunda llamada:
+Al revisar los resultados de la evaluación, se comprobó que el string `[get_weather]` no aparecía siempre en la respuesta del modelo. Para evitar depender de que el LLM lo incluya de forma consistente, se optó por añadir una lógica determinista que lo garantice:
 
 ```python
 if "[get_weather]" not in texto_respuesta:
     texto_respuesta += "\n\nFuentes: [get_weather]"
 ```
 
-Esta es una decisión pragmática: fuerza el comportamiento esperado cuando el modelo lo omite, sin alterar la respuesta cuando ya la incluye.
+Si el modelo ya lo incluyó, no pasa nada. Si no lo incluyó, se añade. Es una solución sencilla pero efectiva para asegurar consistencia en la evaluación.
 
 ### 2.5 Control de la ventana de tokens
 
-El historial de conversación crece con cada turno y puede superar el límite de contexto del modelo. La solución implementada (`controlar_ventana_tokens`) mantiene solo los últimos **2 turnos** (4 mensajes: 2 preguntas + 2 respuestas), eliminando siempre pares completos para no dejar mensajes huérfanos.
+El historial de conversación crece con cada turno y puede superar el límite de contexto del modelo. La solución implementada (`controlar_ventana_tokens`) mantiene solo los últimos **3 turnos** (6 mensajes), eliminando siempre pares completos para no dejar mensajes vacíos.
 
-Se eligió 2 turnos como compromiso entre memoria y coste en tokens. En una aplicación real habría que ajustar este valor según el caso de uso.
+Se eligió 3 turnos como compromiso entre memoria y coste en tokens. En una aplicación real habría que ajustar este valor según el caso de uso.
 
 ### 2.6 Logging de invocaciones
 
@@ -99,7 +99,7 @@ Cada vez que el LLM invoca `get_weather`, se registra en `logs/tool_calls.log` c
 Para la interfaz web se tomaron varias decisiones concretas:
 
 - **`@st.cache_resource`** en la inicialización del vector store y del modelo: garantiza que solo se ejecutan una vez por sesión, evitando regenerar embeddings o crear múltiples clientes de API en cada recarga.
-- **`Path(__file__).parent`** para todas las rutas de ficheros: evita errores de ruta relativa cuando Streamlit ejecuta el script desde un directorio diferente al esperado.
+- **`Path(__file__).parent`** para todas las rutas de ficheros: al ejecutar la app con Streamlit aparecían errores de ruta que no tenían sentido a primera vista. El problema era que Streamlit no ejecuta el script desde el mismo directorio que el archivo, así que las rutas relativas fallaban. La solución fue construir todas las rutas a partir de la ubicación del propio archivo.
 - **`st.session_state.historial`** en vez de una variable global: Streamlit re-ejecuta el script completo en cada interacción, así que el historial debe vivir en el estado de sesión para persistir entre mensajes.
 - **Streaming real con generadores**: la función `chat_with_tools` devuelve un generador cuando `stream=True`. La primera llamada al LLM (detección de tool calls) siempre es bloqueante; solo la llamada final se streamea. Esto permite mostrar el spinner mientras se procesa la lógica y luego hacer aparecer el texto token a token.
 
@@ -140,7 +140,7 @@ Si el usuario pregunta "¿hace buen tiempo en Tenerife?", el LLM puede responder
 
 ### 4.5 Ventana de historial corta
 
-Mantener solo 2 turnos en memoria es suficiente para conversaciones simples, pero puede romper el hilo en conversaciones más largas donde el usuario hace referencia a algo dicho hace tres o cuatro mensajes.
+Mantener solo 3 turnos en memoria es suficiente para conversaciones simples, pero puede romper el hilo en conversaciones más largas donde el usuario hace referencia a algo dicho hace tres o cuatro mensajes.
 
 ---
 
@@ -164,10 +164,3 @@ Guardar el historial de cada usuario en una base de datos (SQLite, Redis) indexa
 
 Añadir un diccionario de municipios y puntos de interés mapeados a sus zonas para que `get_weather` no dependa de que el modelo infiera la zona correctamente.
 
-### 5.4 Despliegue en la nube
-
-Publicar la aplicación en Streamlit Community Cloud o en un servicio como Azure App Service para que sea accesible sin necesidad de ejecutarla en local. Requeriría gestión segura de la API key mediante secrets del entorno de despliegue.
-
-### 5.5 Multimodalidad
-
-Gemini 2.5 Flash soporta imágenes. Se podría permitir que el usuario suba una foto de un monumento o plato de comida y el asistente lo identifique y proporcione información relacionada.
